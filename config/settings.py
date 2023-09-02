@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -128,8 +128,16 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = {
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-    ]
+
+API_URL = 'https://api.stripe.com/v1/payment_intents'
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+CELERY_BEAT_SCHEDULE = {
+    'problems_update': {
+        'task': 'problems.tasks.my_task',
+        'schedule': timedelta(days=1),
+    },
 }
