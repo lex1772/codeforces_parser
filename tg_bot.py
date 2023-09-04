@@ -30,6 +30,22 @@ def get_data(theme, problem_complexity,
     return data[:11]
 
 
+def get_problem(number_of_problem,
+                conn=psycopg2.connect(dbname=settings.DATABASES['default']['NAME'],
+                                      user=settings.DATABASES['default']['USER'],
+                                      password=settings.DATABASES['default']['PASSWORD'])):
+    """Функция, которая получает из базы данных задачи по критериям пользователя, перемешивает их и возвращает 10 штук"""
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT * FROM problems_problem WHERE number_of_problem = '{number_of_problem}'")
+            rows = cur.fetchall()
+            data = []
+            for row in rows:
+                data.append(row)
+    return data
+
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     '''Функция приветствия бота'''
@@ -37,9 +53,27 @@ def send_welcome(message):
     user_dict['chat_id'] = chat_id
     msg = bot.reply_to(message, """\
 Привет!
-Напиши сложность задач
+Если хочешь найти определенную задачу, то пришли ее номер, если хочешь получить подборку задач, то напиши слово пропустить
 """)
-    bot.register_next_step_handler(msg, problem_complexity)
+    bot.register_next_step_handler(msg, find_problem)
+
+
+def find_problem(message):
+    '''Функция поиска конкретной задачи'''
+    try:
+        user_answer = message.text.lower()
+        if user_answer == "пропустить":
+            msg = bot.reply_to(message, """\
+        Напиши сложность задач
+        """)
+            bot.register_next_step_handler(msg, problem_complexity)
+        else:
+            try:
+                bot.send_message(user_dict['chat_id'], str(get_problem(user_answer)[0]))
+            except Exception as e:
+                bot.reply_to(message, 'oooops')
+    except Exception as e:
+        bot.reply_to(message, 'oooops')
 
 
 def problem_complexity(message):
