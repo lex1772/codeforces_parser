@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Problem(models.Model):
+    '''Модель для задач с полями, которые описаны в ТЗ'''
     theme = models.CharField(max_length=255, verbose_name='тема')
     number_of_solution = models.IntegerField(verbose_name='количество решений')
     number_of_problem = models.CharField(max_length=255, verbose_name='номер задачи')
